@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 ### AndroidStudio ###
 # Covers files to be ignored for android development using Android Studio.
 
+=======
+>>>>>>> f3df5bea5446915c8b75183d793c3fda81aba25d
 # Built application files
 *.apk
 *.ap_
@@ -17,6 +20,7 @@ gen/
 out/
 
 # Gradle files
+<<<<<<< HEAD
 .gradle
 .gradle/
 build/
@@ -24,6 +28,11 @@ build/
 # Signing files
 .signing/
 
+=======
+.gradle/
+build/
+
+>>>>>>> f3df5bea5446915c8b75183d793c3fda81aba25d
 # Local configuration file (sdk path, etc)
 local.properties
 
@@ -33,6 +42,7 @@ proguard/
 # Log Files
 *.log
 
+<<<<<<< HEAD
 # Android Studio
 /*/build/
 /*/local.properties
@@ -130,3 +140,32 @@ fabric.properties
 
 .idea/instapk.xml
 instapk.log*
+=======
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
+# Intellij
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/libraries
+
+# Keystore files
+*.jks
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+>>>>>>> f3df5bea5446915c8b75183d793c3fda81aba25d
