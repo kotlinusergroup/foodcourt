@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectStorageHelper">
     <option name="apkLocation" value="$PROJECT_DIR$/app/build/outputs/apk/app-debug.apk" />
-    <option name="projectName" value="UL FoodCourt" />
+    <option name="packageName" value="com.kotlinusergroup.ulfoodcourt" />
+    <option name="projectName" value="ULFoodCourt" />
   </component>
 </project>
