@@ -10,10 +10,7 @@ import android.util.Log
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.kotlinusergroup.ulfoodcourt.R
 import com.kotlinusergroup.ulfoodcourt.adapters.FoodMenuRecyclerViewAdapter
 import com.kotlinusergroup.ulfoodcourt.models.Feedback
@@ -30,9 +27,9 @@ class MenuActivity : AppCompatActivity() {
     private var foodMenuList = ArrayList<FoodMenu>()
 
     // Firebase init
-    private val database = FirebaseDatabase.getInstance()
-    private var foodMenuDatabase = database.getReference("menu")
-    private var feedBackDatabase = database.getReference("feedback")
+    lateinit var database: FirebaseDatabase
+    lateinit var foodMenuDatabase: DatabaseReference
+    lateinit var feedBackDatabase: DatabaseReference
 
 
     //BottomSheet behavior
@@ -41,6 +38,13 @@ class MenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
+        //Enable Offline
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+
+        database = FirebaseDatabase.getInstance()
+        foodMenuDatabase = database.getReference("menu")
+        feedBackDatabase = database.getReference("feedback")
+
 
         behavior = BottomSheetBehavior.from(bottomsheet)
         initBottomSheet()
@@ -53,13 +57,13 @@ class MenuActivity : AppCompatActivity() {
 
             if (!rating.text.isEmpty()) {
                 //Unique Device Identiy
-                val udid = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
+                val id = Settings.Secure.ANDROID_ID
                 val rating = rating.text.toString()
                 val feedbackText = editTextFeedback.text.toString()
                 val time = Calendar.getInstance().time.toString()
 
                 //Feedback Model
-                val feedback = Feedback(udid, rating, feedbackText, time)
+                val feedback = Feedback(id, rating, feedbackText, time)
                 //Set values
                 feedBackDatabase.push().setValue(feedback)
 
@@ -117,8 +121,6 @@ class MenuActivity : AppCompatActivity() {
 
     private fun initBottomSheet() {
 
-
-
         imageViewUp.setOnClickListener {
             if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -129,6 +131,7 @@ class MenuActivity : AppCompatActivity() {
             }
         }
 
+        //Optional
         behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 //showing the different states
