@@ -1,6 +1,8 @@
 package com.kotlinusergroup.ulfoodcourt.activities
 
 import android.os.Bundle
+import android.provider.Settings
+import android.support.constraint.ConstraintLayout
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -12,21 +14,33 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.kotlinusergroup.ulfoodcourt.R
 import com.kotlinusergroup.ulfoodcourt.adapters.FoodMenuRecyclerViewAdapter
+import com.kotlinusergroup.ulfoodcourt.models.Feedback
 import com.kotlinusergroup.ulfoodcourt.models.FoodMenu
 import kotlinx.android.synthetic.main.activity_menu.*
 import kotlinx.android.synthetic.main.layout_feedback.*
+import java.util.*
+
 
 class MenuActivity : AppCompatActivity() {
 
     private var TAG = "MainActivity"
+    //ArrayList
     private var foodMenuList = ArrayList<FoodMenu>()
-    // Write a message to the database
+
+    // Firebase init
     private val database = FirebaseDatabase.getInstance()
     private var foodMenuDatabase = database.getReference("menu")
+    private var feedBackDatabase = database.getReference("feedback")
+
+
+    //BottomSheet behavior
+    lateinit var behavior: BottomSheetBehavior<ConstraintLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
+
+        behavior = BottomSheetBehavior.from(bottomsheet)
         initBottomSheet()
 
         initFoodMenu()
@@ -34,7 +48,14 @@ class MenuActivity : AppCompatActivity() {
 
     private fun initFoodMenu() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = FoodMenuRecyclerViewAdapter(foodMenuList)
+        recyclerView.adapter = FoodMenuRecyclerViewAdapter(this, foodMenuList)
+
+        //Write to the database
+//        var menuList = ArrayList<FoodMenu>()
+//        menuList.add(FoodMenu(0,"Burger","http://bit.ly/2Ee4M6I",200,1))
+//        menuList.add(FoodMenu(1,"Pizza","http://bit.ly/2rFdOqY",200,0))
+//        foodMenuDatabase.setValue(menuList)
+
 
         // Read from the database
         foodMenuDatabase.addValueEventListener(object : ValueEventListener {
@@ -42,13 +63,20 @@ class MenuActivity : AppCompatActivity() {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 foodMenuList.clear()
-                dataSnapshot.children
-                        .map { it.getValue(FoodMenu::class.java) }
-                        .forEach {
-                            Log.e("Get Data", it!!.name)
-                            foodMenuList.add(it)
-                            recyclerView.adapter.notifyDataSetChanged()
-                        }
+
+                for (snapshot in dataSnapshot.children) {
+                    val user = snapshot.getValue<FoodMenu>(FoodMenu::class.java)
+                    foodMenuList.add(user!!)
+                    recyclerView.adapter.notifyDataSetChanged()
+                }
+
+//                OR
+//                dataSnapshot.children
+//                        .map { it.getValue(FoodMenu::class.java) }
+//                        .forEach {
+//                            foodMenuList.add(it)
+//                            recyclerView.adapter.notifyDataSetChanged()
+//                        }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -58,15 +86,32 @@ class MenuActivity : AppCompatActivity() {
         })
 
 
+        buttonSend.setOnClickListener {
+            if (!editTextFeedback.text.isEmpty()) {
+                //Unique Device Identiy
+                val udid = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
+                val feedbackText = editTextFeedback.text.toString()
+                val time = Calendar.getInstance().time.toString()
+
+                //Feedback Model
+                val feedback = Feedback(udid, feedbackText, time)
+                //Set values
+                feedBackDatabase.push().setValue(feedback)
+
+                editTextFeedback.text.clear()
+            }
+        }
+
+
     }
 
 
     private fun initBottomSheet() {
 
-        val behavior = BottomSheetBehavior.from(bottomsheet)
+
 
         imageViewUp.setOnClickListener {
-            if (behavior!!.state == BottomSheetBehavior.STATE_COLLAPSED) {
+            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 imageViewUp.setImageResource(R.drawable.ic_down)
             } else {
@@ -75,7 +120,7 @@ class MenuActivity : AppCompatActivity() {
             }
         }
 
-        behavior?.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 //showing the different states
                 when (newState) {
@@ -99,6 +144,14 @@ class MenuActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    override fun onBackPressed() {
+        if (behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            onBackPressed()
+        }
     }
 
 }
