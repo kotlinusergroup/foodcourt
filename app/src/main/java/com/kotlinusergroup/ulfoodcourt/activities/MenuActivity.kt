@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
+import android.widget.RadioButton
+import android.widget.Toast
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -42,8 +44,33 @@ class MenuActivity : AppCompatActivity() {
 
         behavior = BottomSheetBehavior.from(bottomsheet)
         initBottomSheet()
-
         initFoodMenu()
+
+        //Add Feedback
+        buttonSend.setOnClickListener {
+
+            val rating = findViewById<RadioButton>(radioGroup.checkedRadioButtonId)
+
+            if (!rating.text.isEmpty()) {
+                //Unique Device Identiy
+                val udid = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
+                val rating = rating.text.toString()
+                val feedbackText = editTextFeedback.text.toString()
+                val time = Calendar.getInstance().time.toString()
+
+                //Feedback Model
+                val feedback = Feedback(udid, rating, feedbackText, time)
+                //Set values
+                feedBackDatabase.push().setValue(feedback)
+
+                Toast.makeText(this, getString(R.string.thanks_message), Toast.LENGTH_SHORT).show()
+                editTextFeedback.text.clear()
+                radioGroup.clearCheck()
+            } else {
+                Toast.makeText(this, getString(R.string.select_rating), Toast.LENGTH_SHORT).show()
+            }
+        }
+
     }
 
     private fun initFoodMenu() {
@@ -84,24 +111,6 @@ class MenuActivity : AppCompatActivity() {
                 Log.w(TAG, "Failed to read value.", error.toException())
             }
         })
-
-
-        buttonSend.setOnClickListener {
-            if (!editTextFeedback.text.isEmpty()) {
-                //Unique Device Identiy
-                val udid = Settings.Secure.getString(this.contentResolver, Settings.Secure.ANDROID_ID)
-                val feedbackText = editTextFeedback.text.toString()
-                val time = Calendar.getInstance().time.toString()
-
-                //Feedback Model
-                val feedback = Feedback(udid, feedbackText, time)
-                //Set values
-                feedBackDatabase.push().setValue(feedback)
-
-                editTextFeedback.text.clear()
-            }
-        }
-
 
     }
 
