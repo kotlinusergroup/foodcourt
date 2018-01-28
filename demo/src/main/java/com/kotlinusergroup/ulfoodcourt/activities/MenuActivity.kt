@@ -35,6 +35,7 @@ class MenuActivity : AppCompatActivity() {
     //BottomSheet behavior
     lateinit var behavior: BottomSheetBehavior<ConstraintLayout>
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
@@ -131,7 +132,7 @@ class MenuActivity : AppCompatActivity() {
             }
         }
 
-        //Optional
+        
         behavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 //showing the different states
